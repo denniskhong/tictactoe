@@ -2,8 +2,10 @@
 
 # Tic Tac Toe
 # This Python program uses pseudo one-base indexing
-# Author: Dennis W. K. Khong
+# Author: Dennis W. K. Khong <denniswkkhong@gmail.com>
+# Github: https://github.com/denniskhong/tictactoe
 # Date: 2023-04-28
+# License: GPL 3.0
 
 import random, sys
 from numpy import unique
@@ -79,9 +81,9 @@ def display_board():
             elif row % 2 == 0:
                 print('┼───', end='')
             #end if
-        #end for
-    #end for
-    print('')
+        #end for col
+    #end for row
+    print('') # Print line break
 #end display_board()
 
 
@@ -138,6 +140,7 @@ def check_win():
 def check_tie():
     if len(moves) == 0: # No more moves
         return True
+    #end if
 
     # It's a tie if all possible rows, cols and diagonals cannot win
 
@@ -194,7 +197,11 @@ def computer_move(player):
                 if check_win():
                     board[row][col] = ' '
                     return rowcol2move(row, col)
+                #end if
                 board[row][col] = ' '
+            #end if
+        #end for col
+    #end for row
 
     # Find a blocking move
     for row in range(1,size+1):
@@ -208,13 +215,18 @@ def computer_move(player):
                 if check_win():
                     board[row][col] = ' '
                     return rowcol2move(row, col)
+                #end if
                 board[row][col] = ' '
+            #end if
+        #end for col
+    #end for row
 
     # If the computer can't block the user from winning, make a random move.
     while True:
         move = random.choice(moves)
         if move not in board:
             break
+        #end if
     #end loop
     return move
 #end computer_move()
@@ -283,6 +295,7 @@ while True:
         else:
             move = computer_move(current_player)
             print('Step {}: Computer {} chooses {}.'.format(step, current_player, move))
+        #end if
         register_move(move)
         display_board()
         
@@ -290,6 +303,7 @@ while True:
         if check_win():
             game_status = current_player
             break
+        #end if
         if check_tie():
             game_status = 'TIE'
             break
