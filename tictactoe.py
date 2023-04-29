@@ -10,19 +10,66 @@
 import random, sys
 from numpy import unique
 
-# Define new range using 1-based indexing
-def rangen(start=None, stop=None, step=None):
-    if stop == None:
-        stop = start
-        start = 1
-    #end if
-    if step == None:
-        step = 1
+# Define range function with 1-based indexing
+def range_uno(start, stop=None, step=1):
+    '''
+    Function range_uno([start=1], stop, [step=1])
+    Argument start by default will start at 1, and the list generated 
+    will stop at the value of stop, inclusive. The purpose of this
+    function is to implement the range function by 
+    (1) using one-base indexing, and 
+    (2) stop at the stop value and not before.
+    '''
+    if stop == None:  # Only one argument given
+        stop, start = start, 1
     #end if
     if step>0:
         return list(range(start, stop+1, step))
     elif step<0:
         return list(range(start, stop-1, step))
+    #end if
+#end def
+
+
+# Define validated_input function
+def validated_input(prompt, validate=None, errmessage='Invalid response.'):
+    '''
+    Function validated_input(prompt, [validate], [errmessage='Invalid response.'])
+    Implements the input function by:
+    (1) Validating the response in a validate vector,
+    (2) Returning response in the same type as the element of validate
+    vector,
+    (3) If no value for validate is provided, then no validating is made,
+    (4) Providing a default error message.
+    
+    '''
+    if type(validate) != None:
+        validate_type = type(validate[0])
+    else:
+        validate_type = None
+    #end if
+    
+    if validate_type == int or validate_type == float:
+        validate = [str(n).upper() for n in validate]
+    #end if
+
+    if validate_type == None:
+        return input(question)
+    else:
+        while True:
+            response = input(prompt)
+            if response.upper() in validate:
+                if validate_type == int:
+                    return int(response)
+                elif validate_type == float:
+                    return float(response)
+                else:
+                    return response
+                #end if
+            else:
+                print(errmessage)
+            #end if
+        #end while loop
     #end if
 #end def
 
@@ -39,30 +86,6 @@ def rowcol2move(row, col):
 #end def
 
 
-# Define verified_input function
-def verified_input(question, vec):
-    vec_type = type(vec[0])
-    if vec_type == int or vec_type == float:
-        vec = [str(n) for n in vec]
-    #end if
-    
-    while True:
-        response = input(question).upper()
-        if response in vec:
-            if vec_type == int:
-                return int(response)
-            elif vec_type == float:
-                return float(response)
-            else:
-                return response
-            #end if
-        else:
-            print('Invalid response.')
-        #end if
-    #end while loop
-#end def
-
-
 # Register a move
 def register_move(move):
     row, col = move2rowcol(move)
@@ -73,8 +96,8 @@ def register_move(move):
 
 # Display board
 def display_board():
-    for r in rangen(0, size*2+2):
-        for c in rangen(0, size+1):
+    for r in range_uno(0, size*2+2):
+        for c in range_uno(0, size+1):
             if r == 0 and c == 0:
                 print('┌───', end='')
             elif r == 0 and c == size+1:
@@ -119,8 +142,8 @@ def num_unique(vec):
 # Check for a win
 def check_win():
     # Check by row and col
-    for m in rangen(size):
-        for n in rangen(size-consecutive+1):
+    for m in range_uno(size):
+        for n in range_uno(size-consecutive+1):
             # create row vector
             vec = exclude_spaces(board[m][n:n+consecutive])
             if (len(vec) == consecutive) and (num_unique(vec) == 1):
@@ -136,7 +159,7 @@ def check_win():
     #end for n
     
     # Check diagonally
-    for m in rangen(size-consecutive+1):
+    for m in range_uno(size-consecutive+1):
         vec = exclude_spaces([board[n][n] for n in range(m, m+consecutive)])
         if (len(vec) == consecutive) and (num_unique(vec) == 1):
             return True
@@ -161,8 +184,8 @@ def check_tie():
 
     # It's a tie if all possible rows, cols and diagonals cannot win
 
-    for m in rangen(size):
-        for n in rangen(size-consecutive+1):
+    for m in range_uno(size):
+        for n in range_uno(size-consecutive+1):
             # Check by row
             vec = exclude_spaces(board[m][n:n+consecutive])
             if num_unique(vec) < 2:
@@ -178,7 +201,7 @@ def check_tie():
     #end for m
     
     # Check diagonally
-    for m in rangen(size-consecutive+1):
+    for m in range_uno(size-consecutive+1):
         vec = exclude_spaces([board[n][n] for n in range(m, m+consecutive)])
         if num_unique(vec) < 2:
             return False
@@ -196,15 +219,15 @@ def check_tie():
 
 # Get human player's move
 def human_move():
-    return verified_input('Step {}: Player {}, enter your move: '.format(step, current_player), moves)
+    return validated_input('Step {}: Player {}, enter your move: '.format(step, current_player), moves+[s.lower() for s in moves], 'Sorry, that is not a valid move.').upper()
 #end def
 
 
 # Computer's move
 def computer_move(player):
     # Find a winning move
-    for row in rangen(size):
-        for col in rangen(size):
+    for row in range_uno(size):
+        for col in range_uno(size):
             if board[row][col] == ' ':
                 if player == 'O':
                     board[row][col] = 'O'
@@ -221,8 +244,8 @@ def computer_move(player):
     #end for row
 
     # Find a blocking move
-    for row in rangen(size):
-        for col in rangen(size):
+    for row in range_uno(size):
+        for col in range_uno(size):
             if board[row][col] == ' ':
                 if player == 'O':
                     board[row][col] = 'X'
@@ -251,32 +274,32 @@ def computer_move(player):
 
 ## Program starts
 
-size = verified_input('What board size do you want to play (3-9)? ', [n for n in rangen(3,9)])
+size = validated_input('What board size do you want to play (3-9)? ', [n for n in range_uno(3,9)], 'Answer must be from 3 to 9.')
 
 consecutive = size
 # It is possible to reduce the number of consecutive cells to win
 # if size == 3:
     # consecutive = 3
 # else:
-    # consecutive = verified_input('How many consecutive cells to win (3-{})? '.format(size), [n for n in rangen(3,size)])
+    # consecutive = validated_input('How many consecutive cells to win (3-{})? '.format(size), [n for n in range_uno(3,size)], 'Answer must be from 3 to {}.'.format(size))
 # #end if
 
 # Select play mode
-play_mode = verified_input('Select play mode: (1) Human vs computer, (2) Computer vs computer or (3) Human vs human? ', [1, 2, 3])
+play_mode = validated_input('Select play mode: (1) Human vs computer, (2) Computer vs computer or (3) Human vs human? ', [1, 2, 3], 'Answer must be 1, 2 or 3.')
 
 while True:
     # Initialise game
 
     # Define an empty board
-    board = [[' ']*(size+1) for _ in rangen(0, size)]
+    board = [[' ']*(size+1) for _ in range_uno(0, size)]
     
     rows = [' ']
-    for n in rangen(size):
+    for n in range_uno(size):
         rows.append(chr(ord('A') + n - 1))
     #end for
     
     cols = [' ']
-    for n in rangen(size):
+    for n in range_uno(size):
         cols.append(str(n))
     #end for
     
@@ -347,7 +370,7 @@ while True:
     #end if
     
     # Ask to play again
-    if verified_input('Play again (Y/N)? ', ['Y', 'N']) == 'N':
+    if validated_input('Play again (Y/N)? ', ['Y', 'N', 'y', 'n'], 'Answer must be either Y or N.').upper() == 'N':
         break
     #end if
 #end loop
