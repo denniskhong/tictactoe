@@ -4,22 +4,39 @@
 # This Python program uses pseudo one-base indexing
 # Author: Dennis W. K. Khong <denniswkkhong@gmail.com>
 # Github: https://github.com/denniskhong/tictactoe
-# Date: 2023-04-28
+# Date: 2023-04-29
 # License: GPL 3.0
 
 import random, sys
 from numpy import unique
 
+# Define new range using 1-based indexing
+def rangen(start=None, stop=None, step=None):
+    if stop == None:
+        stop = start
+        start = 1
+    #end if
+    if step == None:
+        step = 1
+    #end if
+    if step>0:
+        return list(range(start, stop+1, step))
+    elif step<0:
+        return list(range(start, stop-1, step))
+    #end if
+#end def
+
+
 # Convert moves to row and col
 def move2rowcol(move):
     return (rows.index(move[0]), cols.index(move[1:]))
-#end move2rowcol()
+#end def
 
 
 # Convert row and col to move
 def rowcol2move(row, col):
     return rows[row] + cols[col]
-#end rowcol2move()
+#end def
 
 
 # Define verified_input function
@@ -42,8 +59,8 @@ def verified_input(question, vec):
         else:
             print('Invalid response.')
         #end if
-    #end loop
-#end verified_input()
+    #end while loop
+#end def
 
 
 # Register a move
@@ -51,59 +68,59 @@ def register_move(move):
     row, col = move2rowcol(move)
     board[row][col] = current_player
     moves.remove(move)
-#end register_move()
+#end def
 
 
 # Display board
 def display_board():
-    for row in range(size*2+3):
-        for col in range(size+2):
-            if row == 0 and col == 0:
+    for r in rangen(0, size*2+2):
+        for c in rangen(0, size+1):
+            if r == 0 and c == 0:
                 print('┌───', end='')
-            elif row == 0 and col == size+1:
+            elif r == 0 and c == size+1:
                 print('┐')
-            elif row == 0:
+            elif r == 0:
                 print('┬───', end='')
-            elif row == size*2+2 and col == 0:
+            elif r == size*2+2 and c == 0:
                 print('└───', end='')
-            elif row == size*2+2 and col == size+1:
+            elif r == size*2+2 and c == size+1:
                 print('┘')
-            elif row == size*2+2:
+            elif r == size*2+2:
                 print('┴───', end='')
-            elif row % 2 != 0 and col == size+1: # Odd number row
+            elif r % 2 != 0 and c == size+1: # Odd number row
                 print('│')
-            elif row % 2 != 0: 
-                print('│ {} '.format(board[int(row/2)][col]), end='')
-            elif row % 2 == 0 and col == 0: # Even number row
+            elif r % 2 != 0: 
+                print('│ {} '.format(board[int(r/2)][c]), end='')
+            elif r % 2 == 0 and c == 0: # Even number row
                 print('├───', end='')
-            elif row % 2 == 0 and col == size+1: 
+            elif r % 2 == 0 and c == size+1: 
                 print('┤') 
-            elif row % 2 == 0:
+            elif r % 2 == 0:
                 print('┼───', end='')
             #end if
-        #end for col
-    #end for row
+        #end for c
+    #end for r
     print('') # Print line break
-#end display_board()
+#end def
 
 
 # Exclude spaces
 def exclude_spaces(vec):
     return [i for i in vec if i != ' ']
-#end exclude_spaces()
+#end def
 
 
 # Get number of unique items excluding spaces
 def num_unique(vec):
     return len(unique(vec))
-#end num_unique()
+#end def
 
 
 # Check for a win
 def check_win():
     # Check by row and col
-    for m in range(1, size+1):
-        for n in range(1, size-consecutive+2):
+    for m in rangen(size):
+        for n in rangen(size-consecutive+1):
             # create row vector
             vec = exclude_spaces(board[m][n:n+consecutive])
             if (len(vec) == consecutive) and (num_unique(vec) == 1):
@@ -119,7 +136,7 @@ def check_win():
     #end for n
     
     # Check diagonally
-    for m in range(1, size-consecutive+2):
+    for m in rangen(size-consecutive+1):
         vec = exclude_spaces([board[n][n] for n in range(m, m+consecutive)])
         if (len(vec) == consecutive) and (num_unique(vec) == 1):
             return True
@@ -133,7 +150,7 @@ def check_win():
 
     # No winner
     return False
-#end check_win()
+#end def
 
 
 # Check for a tie
@@ -144,8 +161,8 @@ def check_tie():
 
     # It's a tie if all possible rows, cols and diagonals cannot win
 
-    for m in range(1, size+1):
-        for n in range(1, size-consecutive+2):
+    for m in rangen(size):
+        for n in rangen(size-consecutive+1):
             # Check by row
             vec = exclude_spaces(board[m][n:n+consecutive])
             if num_unique(vec) < 2:
@@ -161,7 +178,7 @@ def check_tie():
     #end for m
     
     # Check diagonally
-    for m in range(1, size-consecutive+2):
+    for m in rangen(size-consecutive+1):
         vec = exclude_spaces([board[n][n] for n in range(m, m+consecutive)])
         if num_unique(vec) < 2:
             return False
@@ -174,20 +191,20 @@ def check_tie():
 
     # If all checks doesn't flag as False
     return True
-#end check_tie()
+#end def
 
 
 # Get human player's move
 def human_move():
     return verified_input('Step {}: Player {}, enter your move: '.format(step, current_player), moves)
-#end get_move()
+#end def
 
 
 # Computer's move
 def computer_move(player):
     # Find a winning move
-    for row in range(1,size+1):
-        for col in range(1,size+1):
+    for row in rangen(size):
+        for col in rangen(size):
             if board[row][col] == ' ':
                 if player == 'O':
                     board[row][col] = 'O'
@@ -204,8 +221,8 @@ def computer_move(player):
     #end for row
 
     # Find a blocking move
-    for row in range(1,size+1):
-        for col in range(1,size+1):
+    for row in rangen(size):
+        for col in rangen(size):
             if board[row][col] == ' ':
                 if player == 'O':
                     board[row][col] = 'X'
@@ -229,19 +246,19 @@ def computer_move(player):
         #end if
     #end loop
     return move
-#end computer_move()
+#end def
 
 
 ## Program starts
 
-size = verified_input('What board size do you want to play (3-9)? ', [n for n in range(3,10)])
+size = verified_input('What board size do you want to play (3-9)? ', [n for n in rangen(3,9)])
 
 consecutive = size
 # It is possible to reduce the number of consecutive cells to win
 # if size == 3:
     # consecutive = 3
 # else:
-    # consecutive = verified_input('How many consecutive cells to win (3-{})? '.format(size), [n for n in range(3,size+1)])
+    # consecutive = verified_input('How many consecutive cells to win (3-{})? '.format(size), [n for n in rangen(3,size)])
 # #end if
 
 # Select play mode
@@ -251,15 +268,15 @@ while True:
     # Initialise game
 
     # Define an empty board
-    board = [[' ']*(size+1) for _ in range(size+1)]
+    board = [[' ']*(size+1) for _ in rangen(0, size)]
     
     rows = [' ']
-    for n in range(size):
-        rows.append(chr(ord('A') + n))
+    for n in rangen(size):
+        rows.append(chr(ord('A') + n - 1))
     #end for
     
     cols = [' ']
-    for n in range(1, size+1):
+    for n in rangen(size):
         cols.append(str(n))
     #end for
     
