@@ -364,7 +364,7 @@ while True:
     if game_status == 'TIE':
         print('The game ends in a tie in {} steps.'.format(step))
     elif (play_mode == 1 and game_status == 'X') or (play_mode == 3):
-        print('Congratulations, player {} won in {} steps!'.format(game_status, step))
+        print('Congratulations, you won in {} steps!'.format(step))
     else:
         print('Computer {} won in {} steps!'.format(game_status, step))
     #end if
