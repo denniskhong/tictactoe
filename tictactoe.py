@@ -4,7 +4,7 @@
 # This Python program uses pseudo one-base indexing
 # Author: Dennis W. K. Khong <denniswkkhong@gmail.com>
 # Github: https://github.com/denniskhong/tictactoe
-# Date: 2023-04-29
+# Date: 2023-05-06
 # License: GPL 3.0
 
 import random, sys
@@ -324,11 +324,14 @@ while True:
     game_status = None
     
     # Define step counter
-    step = 1
+    step = 0
 
     display_board()
 
     while (not game_status):
+        # Increase step
+        step += 1
+        
         # Get the player's move
         if (play_mode == 1 and current_player == 'X') or (play_mode == 3):
             move = human_move()
@@ -355,9 +358,6 @@ while True:
         else:
             current_player = 'X'
         #end if
-        
-        # Increase step
-        step += 1
     #end while
 
     # Display the winner
@@ -375,5 +375,5 @@ while True:
     #end if
 #end loop
 
-print('Good bye.')
+print('Goodbye.')
 #end program
