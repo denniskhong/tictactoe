@@ -2,6 +2,7 @@
 
 # Tic Tac Toe
 # Author: Dennis W. K. Khong <denniswkkhong@gmail.com>
+# Some comments were suggested by ChatGPT.
 # Github: https://github.com/denniskhong/tictactoe
 # Date: 2023-05-06
 # License: GPL 3.0
@@ -54,29 +55,47 @@ end
 
 # Convert moves to row and col
 function  move2rowcol(move)
-    # Only accepts a single character row label.
+    """
+    Function to convert user move to row and column values in the board.
+    Only accepts a single character row label.
+    """
     return (Int(move[1])-64), tryparse(Int64, move[2:length(move)])
 end
 
 
 # Convert row and col to move
 function rowcol2move(row, col)
+    """
+    Function to convert row and column values to user move in a string
+    """
     return row_labels[row] * col_labels[col]
 end
 
 
 # Register a move
 function register_move(move)
+    """
+    Function to register a move by updating the board and removing the move from the available moves in vector moves.
+    String move is a valid user-entered move.
+    """
     global board, current_player, moves
     
+    # Convert user-entered move to row and column numbers
     row, col = move2rowcol(move)
+    # Add the player's symbol into the board based on the row and column number
     board[row, col] = current_player
-    moves = filter(s -> s != move, moves)
+    # Update list of remaining valid moves by filtering out the registered move
+    moves = filter(s -> s != move, moves)  # Uses lambda expression
 end
 
 
 # Display board
 function display_board()
+    """
+    Function to display the board on the console.
+    Row and column labels are not part of the board array, but are
+    kept in separate row_labels and col_labels vectors.
+    """
     global board, row_labels, col_labels, board_size
 
     last_r = board_size * 2 + 2
@@ -122,18 +141,29 @@ end
 
 # Exclude spaces
 function exclude_spaces(vec)
-    return filter(s -> !(s in [" ", " "]), vec)
+    """
+    Function to remove spaces from a vector.
+    """
+    return filter(s -> !(s in [' ', " "]), vec)
 end
 
 
 # Get number of unique items excluding spaces
 function num_unique(vec)
+    """
+    Function to count the number of unique items in a vector, excluding spaces.
+    """
     return length(unique(vec))
 end
 
 
 # Check for a win
 function check_win()
+    """
+    Function to check if the game has been won by any player. It checks the rows, columns, and diagonals for a consecutive number of similar symbols.
+    A winning position is found if consecutive cells contain the same symbol of a player. The winner is assumed to be the last current_player before the call.
+    """
+
     global board_size, consecutive
 
     # Check by row and col
@@ -173,6 +203,13 @@ end
 
 # Check for a tie
 function check_tie()
+    """
+    Function to check the board whether a tie has occurred.
+    A tie occurs when there is no more possible winning moves in rows, columns and diagonally.
+    First, if there is no more moves available, then a tie condition occurs.
+    Alternatively, consecutive cells remain a possible winning move when it only has one player or no player. When a possbible winning move is found, check_tie() immediately returns a false value. Only when the whole board has been completely checked for possible winning moves and none has been found then check_tie() will return a true value.
+    """
+    
     global moves, board_size, consecutive, board
 
     if length(moves) == 0 # No more moves
@@ -215,8 +252,14 @@ function check_tie()
 end
 
 
-# Get human player"s move
+# Get human player's move
 function human_move()
+    """
+    Function to allow a human player to enter a move.
+    User entry is validated against the vector moves containing all possible moves, for both upper case and lower case moves.
+    Return the uppercase of validated user input.
+    """
+
     global step, current_player, moves
     
     return uppercase(input("Step $(step): Player $(current_player), enter your move: ", vcat(moves, lowercase.(moves)), "Sorry, that is not a valid move."))
@@ -225,42 +268,51 @@ end
 
 # Computer's move
 function computer_move(player)
+    """
+    Function for computer player to enter a valid move.
+    First, it checks for a possible winning move by playing available moves to see if a winning move is possible. If a win is found, then return the winning move.
+    Then, it check for a blocking move by playing available moves to see if a winning move by the opponent is possible. If a blocking move is found, then return the blocking move.
+    Finally, if neither a winning move or a blocking move is found, then return a random move from the vector of possible moves.
+    """
+
     global board_size, board, current_player, moves
 
     # Find a winning move
-    for row in 1:board_size
-        for col in 1:board_size
-            if board[row, col] == " "
-                board[row, col] = (player == "O") ? "O" : "X"
-                if check_win()
-                    board[row, col] = " "
-                    return rowcol2move(row, col)
-                end
-                board[row, col] = " "
-            end
+    for m in moves
+        row, col = move2rowcol(m)
+        board[row, col] = (player == "O") ? "O" : "X"
+        if check_win()
+            board[row, col] = " "
+            return m
         end
+        board[row, col] = " "
     end
 
     # Find a blocking move
-    for row in 1:board_size
-        for col in 1:board_size
-            if board[row, col] == " "
-                board[row, col] = (player == "O") ? "X" : "O"
-                if check_win()
-                    board[row, col] = " "
-                    return rowcol2move(row, col)
-                end
-                board[row, col] = " "
-            end
+    for m in moves
+        row, col = move2rowcol(m)
+        board[row, col] = (player == "O") ? "X" : "O"
+        if check_win()
+            board[row, col] = " "
+            return m
         end
+        board[row, col] = " "
     end
-
+    
     # If the computer can't block the user from winning, make a random move.
     return rand(moves)
 end
 
 
 ## Program starts
+
+#Initializes the game board, available moves, and current player.
+#Then, it runs the game in a loop until a player wins or the game ends
+#in a draw. Inside the loop, it displays the current board, prompts the
+#current player for a move, registers the move, checks for a win, and
+#updates the current player. If the game ends, it displays the result
+#and prompts the user to play again.
+
 
 board_size = input("What board size do you want to play (3-$(Max_board_size))? ", 3:Max_board_size, "Answer must be from 3 to $(Max_board_size).")
 
